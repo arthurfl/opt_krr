@@ -1,6 +1,7 @@
 import torch
 from opt_krr.krr_model import KernelRidgeRegression
 from opt_krr.train import train_krr_model
+from opt_krr.plot_utils import plot_learning_curves, plot_predictions_vs_true
 
 if __name__ == "__main__":
     # Create synthetic data
@@ -21,9 +22,23 @@ if __name__ == "__main__":
     initial_lambda = torch.tensor(0.1, dtype=torch.float32)
 
     # Train the model and optimize parameters
-    trained_krr = train_krr_model(krr, (X_ref, y_ref), (X_train, y_train), (X_test, y_test), num_epochs=200, lr=0.01, optimize_lambda=True, initial_gamma=initial_gamma, initial_lambda=initial_lambda)
+    trained_krr, train_losses, test_losses = train_krr_model(
+        krr, (X_ref, y_ref), (X_train, y_train), (X_test, y_test),
+        num_epochs=200, lr=0.01, optimize_lambda=True,
+        initial_gamma=initial_gamma, initial_lambda=initial_lambda
+    )
+
+    # Plot learning curves
+    plot_learning_curves(train_losses, test_losses)
 
     # Make predictions with the trained model
     X_new = torch.randn(5, 3).to(trained_krr.lambda_.device)  # Ensure the new data is also on the same device
     y_new_pred = trained_krr.predict(X_new)
     print(y_new_pred)
+
+    # Plot predictions vs true values
+    y_train_pred = trained_krr.predict(X_train)
+    plot_predictions_vs_true(y_train, y_train_pred, dataset_name="Training")
+
+    y_test_pred = trained_krr.predict(X_test)
+    plot_predictions_vs_true(y_test, y_test_pred, dataset_name="Test")

@@ -26,6 +26,9 @@ def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, 
     optimizer = optim.Adam(params, lr=lr)
     criterion = nn.MSELoss()
 
+    train_losses = []
+    test_losses = []
+
     for epoch in range(num_epochs):
         krr_model.train()
         optimizer.zero_grad()
@@ -35,12 +38,16 @@ def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, 
         train_loss.backward()
         optimizer.step()
 
+        krr_model.eval()
+        with torch.no_grad():
+            y_test_pred = krr_model.predict(X_test)
+            test_loss = criterion(y_test_pred, y_test)
+
+        train_losses.append(train_loss.item())
+        test_losses.append(test_loss.item())
+
         if epoch % 10 == 0:
-            krr_model.eval()
-            with torch.no_grad():
-                y_test_pred = krr_model.predict(X_test)
-                test_loss = criterion(y_test_pred, y_test)
-                print(f'Epoch {epoch}, Train Loss: {train_loss.item()}, Test Loss: {test_loss.item()}')
+            print(f'Epoch {epoch}, Train Loss: {train_loss.item()}, Test Loss: {test_loss.item()}')
 
     print("Optimization finished.")
-    return krr_model
+    return krr_model, train_losses, test_losses
