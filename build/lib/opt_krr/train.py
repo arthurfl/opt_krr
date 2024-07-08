@@ -3,21 +3,14 @@ import torch.optim as optim
 from torch import nn
 
 def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, lr=0.01, optimize_lambda=True, initial_gamma=None, initial_lambda=None):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    krr_model.to(device)
-    
     X_ref, y_ref = ref_data
     X_train, y_train = train_data
     X_test, y_test = test_data
 
-    X_ref, y_ref = X_ref.to(device), y_ref.to(device)
-    X_train, y_train = X_train.to(device), y_train.to(device)
-    X_test, y_test = X_test.to(device), y_test.to(device)
-
     if initial_gamma is not None:
-        krr_model.gamma.data = initial_gamma.to(device)
+        krr_model.gamma.data = initial_gamma
     if initial_lambda is not None:
-        krr_model.lambda_.data = initial_lambda.to(device)
+        krr_model.lambda_.data = initial_lambda
 
     params = [krr_model.gamma]
     if optimize_lambda:
