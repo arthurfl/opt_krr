@@ -2,7 +2,7 @@ import torch
 import torch.optim as optim
 from torch import nn
 
-def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, lr=0.01, optimize_lambda=True, initial_gamma=None, initial_lambda=None, device=None):
+def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, lr=0.01, loss="l1", optimize_lambda=True, initial_gamma=None, initial_lambda=None, device=None):
 
     if device is None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -26,7 +26,11 @@ def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, 
         params.append(krr_model.lambda_)
 
     optimizer = optim.Adam(params, lr=lr)
-    criterion = nn.MSELoss()
+
+    if loss == "l1":
+        criterion = nn.L1Loss()
+    else:
+        criterion = nn.MSELoss()
 
     train_losses = []
     test_losses = []

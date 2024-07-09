@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # Train the model and optimize parameters
     trained_krr, train_losses, test_losses = train_krr_model(
         krr, (X_ref, y_ref), (X_train, y_train), (X_test, y_test),
-        num_epochs=200, lr=0.01, optimize_lambda=True,
+        num_epochs=200, lr=0.01, loss="l1", optimize_lambda=True,
         initial_gamma=initial_gamma, initial_lambda=initial_lambda, 
         device=device
     )
