@@ -53,7 +53,7 @@ def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, 
         test_losses.append(test_loss.item())
 
         if epoch % 10 == 0:
-			print(f'Epoch {epoch}, train Loss: {train_loss.item()}, test loss: {test_loss.item()}, regularization: {torch.abs(krr_model.lambda_)}')
+            print(f'Epoch {epoch}, train Loss: {train_loss.item()}, test loss: {test_loss.item()}, regularization: {torch.abs(krr_model.lambda_)}')
 
     krr_model.lambda_ = torch.abs(krr_model.lambda_)
 
