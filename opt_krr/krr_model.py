@@ -22,7 +22,7 @@ class KernelRidgeRegression(nn.Module):
     
     def _rbf_kernel(self, X, Y):
         gamma = self.gamma
-        gamma_expanded = gamma.view(1, -1)  # Expand gamma for broadcasting
+        gamma_expanded = gamma.view(1, -1)
         X_scaled = X / torch.sqrt(gamma_expanded)
         Y_scaled = Y / torch.sqrt(gamma_expanded)
         K = torch.cdist(X_scaled, Y_scaled) ** 2
@@ -30,9 +30,9 @@ class KernelRidgeRegression(nn.Module):
 
     def _lap_kernel(self, X, Y):
         gamma = self.gamma
-        gamma_expanded = gamma.view(1, -1)  # Expand gamma for broadcasting
-        X_scaled = X / torch.sqrt(gamma_expanded)
-        Y_scaled = Y / torch.sqrt(gamma_expanded)
+        gamma_expanded = gamma.view(1, -1)
+        X_scaled = X / gamma_expanded
+        Y_scaled = Y / gamma_expanded
         K = torch.cdist(X_scaled, Y_scaled)
         return torch.exp(-K)
     
@@ -53,7 +53,7 @@ class KernelRidgeRegression(nn.Module):
         K = self._kernel_function(X_ref, X_ref)
         n = K.shape[0]
         I = torch.eye(n, device=K.device)
-        self.alpha_ = torch.linalg.solve(K + self.lambda_ * I, y_ref)
+        self.alpha_ = torch.linalg.solve(K + torch.abs(self.lambda_) * I, y_ref)
     
     def predict(self, X):
         K = self._kernel_function(X, self.X_ref)
@@ -61,3 +61,32 @@ class KernelRidgeRegression(nn.Module):
 
     def forward(self, X):
         return self.predict(X)
+
+    def save(self, path):
+        model_data = {
+            'state_dict': self.state_dict(),
+            'kernel': self.kernel,
+            'lambda_': self.lambda_.item(),
+            'gamma': self.gamma.detach().cpu().numpy(),
+            'degree': self.degree,
+            'coef0': self.coef0,
+            'X_ref': self.X_ref,
+            'alpha_': self.alpha_
+        }
+        torch.save(model_data, path)
+
+    @classmethod
+    def load(cls, path, input_dim=1):
+        model_data = torch.load(path)
+        model = cls(
+            kernel=model_data['kernel'],
+            lambda_=model_data['lambda_'],
+            gamma=torch.tensor(model_data['gamma']),
+            degree=model_data['degree'],
+            coef0=model_data['coef0'],
+            input_dim=input_dim
+        )
+        model.load_state_dict(model_data['state_dict'])
+        model.X_ref = model_data['X_ref']
+        model.alpha_ = model_data['alpha_']
+        return model
