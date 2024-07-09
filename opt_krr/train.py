@@ -2,8 +2,10 @@ import torch
 import torch.optim as optim
 from torch import nn
 
-def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, lr=0.01, optimize_lambda=True, initial_gamma=None, initial_lambda=None):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, lr=0.01, optimize_lambda=True, initial_gamma=None, initial_lambda=None, device=None):
+
+    if device is None:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     krr_model.to(device)
     
     X_ref, y_ref = ref_data
