@@ -27,6 +27,14 @@ class KernelRidgeRegression(nn.Module):
         Y_scaled = Y / torch.sqrt(gamma_expanded)
         K = torch.cdist(X_scaled, Y_scaled) ** 2
         return torch.exp(-K)
+
+    def _lap_kernel(self, X, Y):
+        gamma = self.gamma
+        gamma_expanded = gamma.view(1, -1)  # Expand gamma for broadcasting
+        X_scaled = X / torch.sqrt(gamma_expanded)
+        Y_scaled = Y / torch.sqrt(gamma_expanded)
+        K = torch.cdist(X_scaled, Y_scaled)
+        return torch.exp(-K)
     
     def _kernel_function(self, X, Y):
         if self.kernel == 'linear':
@@ -35,6 +43,8 @@ class KernelRidgeRegression(nn.Module):
             return self._polynomial_kernel(X, Y)
         elif self.kernel == 'rbf':
             return self._rbf_kernel(X, Y)
+        elif self.kernel == 'lap':
+            return self._lap_kernel(X, Y)
         else:
             raise ValueError(f"Unknown kernel: {self.kernel}")
     
