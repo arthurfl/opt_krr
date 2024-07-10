@@ -7,7 +7,7 @@ def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, 
     if device is None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     krr_model.to(device)
-    
+
     X_ref, y_ref = ref_data
     X_train, y_train = train_data
     X_test, y_test = test_data
@@ -53,8 +53,9 @@ def train_krr_model(krr_model, ref_data, train_data, test_data, num_epochs=100, 
         test_losses.append(test_loss.item())
 
         if epoch % 10 == 0:
-            print(f'Epoch {epoch}, train Loss: {train_loss.item()}, test loss: {test_loss.item()}, regularization: {torch.abs(krr_model.lambda_)}')
+            print(f'Epoch {epoch}, train loss: {train_loss.item()}, test loss: {test_loss.item()}, regularization: {torch.abs(krr_model.lambda_).item()}')
 
-    krr_model.lambda_ = torch.nn.Parameter(torch.abs(krr_model.lambda_))
+    # Ensure lambda_ is positive after training
+    krr_model.lambda_ = nn.Parameter(torch.abs(krr_model.lambda_))
 
     return krr_model, train_losses, test_losses

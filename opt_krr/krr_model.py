@@ -22,17 +22,25 @@ class KernelRidgeRegression(nn.Module):
     
     def _rbf_kernel(self, X, Y):
         gamma = self.gamma
-        gamma_expanded = gamma.view(1, -1)
-        X_scaled = X / torch.sqrt(gamma_expanded)
-        Y_scaled = Y / torch.sqrt(gamma_expanded)
+        if gamma.dim() == 2:
+            X_scaled = torch.matmul(X, torch.linalg.inv(torch.sqrt(gamma)))
+            Y_scaled = torch.matmul(Y, torch.linalg.inv(torch.sqrt(gamma)))
+        else:
+            gamma_expanded = gamma.view(1, -1)
+            X_scaled = X / torch.sqrt(gamma_expanded)
+            Y_scaled = Y / torch.sqrt(gamma_expanded)
         K = torch.cdist(X_scaled, Y_scaled) ** 2
         return torch.exp(-K)
 
     def _lap_kernel(self, X, Y):
         gamma = self.gamma
-        gamma_expanded = gamma.view(1, -1)
-        X_scaled = X / gamma_expanded
-        Y_scaled = Y / gamma_expanded
+        if gamma.dim() == 2:
+            X_scaled = torch.matmul(X, torch.linalg.inv(gamma))
+            Y_scaled = torch.matmul(Y, torch.linalg.inv(gamma))
+        else:
+            gamma_expanded = gamma.view(1, -1)
+            X_scaled = X / gamma_expanded
+            Y_scaled = Y / gamma_expanded
         K = torch.cdist(X_scaled, Y_scaled)
         return torch.exp(-K)
     
