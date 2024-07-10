@@ -33,12 +33,14 @@ if __name__ == "__main__":
     initial_gamma = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
     # initial_gamma_matrix = torch.tensor([[1.0, 0.5, 0.2], [0.5, 2.0, 0.1], [0.1, 0.9, 0.99]])
 
+    print("Least-squares solver")
+
     # Training the model, through simultaneous optimization of lambda and gamma
     trained_krr, train_losses, test_losses = train_krr_model(
         krr, (X_ref, y_ref), (X_train, y_train), (X_test, y_test),
         num_epochs=200, lr=0.01, loss="l1", optimize_lambda=True,
         initial_gamma=initial_gamma, initial_lambda=initial_lambda, 
-        device=device
+        solver="leastsquares", device=device
     )
 
     # Plot learning curves
@@ -55,3 +57,5 @@ if __name__ == "__main__":
 
     y_test_pred = trained_krr.predict(X_test)
     plot_predictions_vs_true(y_test, y_test_pred, dataset_name="Test")
+
+    trained_krr.save('model.pth')

@@ -56,12 +56,19 @@ class KernelRidgeRegression(nn.Module):
         else:
             raise ValueError(f"Unknown kernel: {self.kernel}")
     
-    def fit(self, X_ref, y_ref):
+    def fit(self, X_ref, y_ref, solver="leastsquares"):
         self.X_ref = X_ref
         K = self._kernel_function(X_ref, X_ref)
         n = K.shape[0]
         I = torch.eye(n, device=K.device)
-        self.alpha_ = torch.linalg.solve(K + torch.abs(self.lambda_) * I, y_ref)
+        if solver == "direct":
+            self.alpha_ = torch.linalg.solve(K + torch.abs(self.lambda_) * I, y_ref)
+        elif solver == "leastsquares":
+            self.alpha_ = torch.linalg.lstsq(K + torch.abs(self.lambda_) * I, y_ref).solution
+        else:
+            raise ValueError(f"Unknown solver: {solver}")
+
+
     
     def predict(self, X):
         K = self._kernel_function(X, self.X_ref)
