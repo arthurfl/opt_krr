@@ -5,6 +5,8 @@ from opt_krr.train import train_krr_model
 from opt_krr.utils import compute_whitening_parameters, whiten_data
 from opt_krr.plot_utils import plot_learning_curves, plot_predictions_vs_true
 
+import matplotlib.pyplot as plt
+
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -30,8 +32,8 @@ if __name__ == "__main__":
     # Defining initial regularization strength and bandwidths
     initial_lambda = torch.tensor(0.1, dtype=torch.float32)
     # Bandwidths can either be a vector or a matrix
-    initial_gamma = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
-    # initial_gamma_matrix = torch.tensor([[1.0, 0.5, 0.2], [0.5, 2.0, 0.1], [0.1, 0.9, 0.99]])
+    # initial_gamma = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
+    initial_gamma = torch.tensor([[1.0, 0.5, 0.2], [0.5, 2.0, 0.1], [0.1, 0.9, 0.99]])
 
     print("Least-squares solver")
 
@@ -59,3 +61,7 @@ if __name__ == "__main__":
     plot_predictions_vs_true(y_test, y_test_pred, dataset_name="Test")
 
     trained_krr.save('model.pth')
+
+    # Display the bandwidth matrix
+    plt.imshow(trained_krr.gamma.detach().numpy())
+    plt.show()
